@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://assets/unpressed-tile.png" type="Texture" id=1]
 [ext_resource path="res://Game.gd" type="Script" id=2]
 [ext_resource path="res://TTTR.gd" type="Script" id=3]
+[ext_resource path="res://assets/font.tres" type="DynamicFont" id=4]
+[ext_resource path="res://assets/light-blue-flat-style.tres" type="StyleBox" id=5]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.294118, 0.356863, 0.670588, 1 )
 
 [node name="TTTR" type="Control"]
 anchor_right = 1.0
@@ -719,7 +724,29 @@ margin_right = 164.0
 margin_bottom = 29.0
 stretch_mode = 4
 
+[node name="RestartButton" type="Button" parent="UI/Statusbar"]
+visible = false
+margin_right = 100.0
+margin_bottom = 29.0
+custom_fonts/font = ExtResource( 4 )
+custom_styles/hover = SubResource( 2 )
+custom_styles/normal = ExtResource( 5 )
+text = "Restart"
+
+[node name="WinnerLabel" type="Label" parent="UI/Statusbar"]
+margin_left = 200.0
+margin_right = 300.0
+margin_bottom = 29.0
+custom_fonts/font = ExtResource( 4 )
+custom_styles/normal = ExtResource( 5 )
+text = "TTT Reloaded"
+align = 1
+valign = 1
+clip_text = true
+max_lines_visible = 1
+
 [connection signal="player_changed" from="Game" to="." method="on_player_changed"]
+[connection signal="player_won" from="Game" to="." method="on_player_won"]
 [connection signal="button_up" from="Game/Board0/Buttons/Button0" to="Game" method="on_button_pressed" binds= [ 0, 0 ]]
 [connection signal="button_up" from="Game/Board0/Buttons/Button1" to="Game" method="on_button_pressed" binds= [ 0, 1 ]]
 [connection signal="button_up" from="Game/Board0/Buttons/Button2" to="Game" method="on_button_pressed" binds= [ 0, 2 ]]
@@ -801,3 +828,4 @@ stretch_mode = 4
 [connection signal="button_up" from="Game/Board8/Buttons/Button6" to="Game" method="on_button_pressed" binds= [ 8, 6 ]]
 [connection signal="button_up" from="Game/Board8/Buttons/Button7" to="Game" method="on_button_pressed" binds= [ 8, 7 ]]
 [connection signal="button_up" from="Game/Board8/Buttons/Button8" to="Game" method="on_button_pressed" binds= [ 8, 8 ]]
+[connection signal="button_up" from="UI/Statusbar/RestartButton" to="." method="on_restart_pressed"]
