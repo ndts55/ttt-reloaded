@@ -2,7 +2,9 @@ extends Control
 
 signal player_changed(texture)
 
-# Board / Field State
+# Board State
+enum {Xb, Ob, Nb, Db}
+# Field State
 enum {Xs, Os, Ns}
 # Player Turn
 enum {Xp, Op}
@@ -20,12 +22,12 @@ var board_data : Array = [
 	[Ns, Ns, Ns, Ns, Ns, Ns, Ns, Ns, Ns],
 	[Ns, Ns, Ns, Ns, Ns, Ns, Ns, Ns, Ns],
 ]
-var winners = [Ns, Ns, Ns, Ns, Ns, Ns, Ns, Ns, Ns]
+var winners = [Nb, Nb, Nb, Nb, Nb, Nb, Nb, Nb, Nb]
 var current_player = Xp
-var is_winner = false
 var playable_board = ANY_BOARD
 
 var unpressed_texture = preload("res://assets/unpressed-tile.png")
+var draw_texture = preload("res://assets/draw-tile.png")
 var x_texture = preload("res://assets/player-x-tile.png")
 var o_texture = preload("res://assets/player-o-tile.png")
 
@@ -51,7 +53,7 @@ func is_unpressed(board: int, button: int) -> bool:
 	return board_data[board][button] == Ns
 
 func is_set_allowed(board: int) -> bool:
-	return playable_board == ANY_BOARD or board == playable_board
+	return winners[board] == Nb and (playable_board == ANY_BOARD or board == playable_board)
 
 func set_field(board: int, button: int) -> void:
 	var texture
@@ -76,6 +78,13 @@ func set_field(board: int, button: int) -> void:
 
 func check_finished_board(board: int) -> void:
 	var b = board_data[board]
+	if check_draw(b):
+		winners[board] = Db
+		var overlay = get_node("Board%d/Overlay" % board)
+		overlay.texture = draw_texture
+		overlay.visible = true
+		get_node("Board%d/Buttons" % board).visible = false
+		return
 	var cpd = Xs if current_player == Xp else Os
 	var tmp : Array = []
 	tmp.resize(b.size())
@@ -86,6 +95,13 @@ func check_finished_board(board: int) -> void:
 		var overlay = get_node("Board%d/Overlay" % board)
 		overlay.texture = player_texture(current_player)
 		overlay.visible = true
+		get_node("Board%d/Buttons" % board).visible = false
+
+func check_draw(arr: Array) -> bool:
+	for b in arr:
+		if b == Ns:
+			return false
+	return true
 
 func check_winner() -> void:
 	var cpd = Xs if current_player == Xp else Os
@@ -116,4 +132,4 @@ func check_diag(arr: Array) -> bool:
 	return arr[4] and ((arr[0] and arr[8]) or (arr[2] and arr[6]))
 
 func determine_playable_board(button: int) -> int:
-	return button if winners[button] == Ns else ANY_BOARD
+	return button if winners[button] == Nb else ANY_BOARD
