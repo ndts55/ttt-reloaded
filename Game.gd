@@ -1,5 +1,7 @@
 extends Control
 
+signal player_changed(texture)
+
 # Board / Field State
 enum {Xs, Os, Ns}
 # Player Turn
@@ -27,6 +29,19 @@ var unpressed_texture = preload("res://assets/unpressed-tile.png")
 var x_texture = preload("res://assets/player-x-tile.png")
 var o_texture = preload("res://assets/player-o-tile.png")
 
+func _ready():
+	emit_player_changed()
+
+func emit_player_changed() -> void:
+	emit_signal("player_changed", player_texture(current_player))
+
+func player_texture(player: int):
+	match player:
+		Xp:
+			return x_texture
+		Op:
+			return o_texture
+
 func on_button_pressed(board: int, button: int) -> void:
 	if not is_unpressed(board, button) or not is_set_allowed(board):
 		return
@@ -51,26 +66,30 @@ func set_field(board: int, button: int) -> void:
 			texture = o_texture
 			next_player = Xp
 			data = Os
-	get_node("Board%d/Button%d" % [board, button]).texture_normal = texture
+	get_node("Board%d/Buttons/Button%d" % [board, button]).texture_normal = texture
 	board_data[board][button] = data
 	check_finished_board(board)
 	check_winner()
 	playable_board = determine_playable_board(button)
 	current_player = next_player
+	emit_player_changed()
 
 func check_finished_board(board: int) -> void:
 	var b = board_data[board]
 	var cpd = Xs if current_player == Xp else Os
-	var tmp : Array
+	var tmp : Array = []
 	tmp.resize(b.size())
 	for i in range(b.size()):
 		tmp[i] = b[i] == cpd
 	if check_bool_array(tmp):
 		winners[board] = cpd
+		var overlay = get_node("Board%d/Overlay" % board)
+		overlay.texture = player_texture(current_player)
+		overlay.visible = true
 
 func check_winner() -> void:
 	var cpd = Xs if current_player == Xp else Os
-	var tmp : Array
+	var tmp : Array = []
 	tmp.resize(winners.size())
 	for i in range(winners.size()):
 		tmp[i] = winners[i] == cpd
